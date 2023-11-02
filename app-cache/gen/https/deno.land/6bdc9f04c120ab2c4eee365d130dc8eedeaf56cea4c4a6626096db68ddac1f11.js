@@ -1,0 +1,10 @@
+/**
+ * @private
+ */ export const kUnstableReadReply = Symbol("deno-redis.readReply");
+/**
+ * @private
+ */ export const kUnstablePipeline = Symbol("deno-redis.pipeline");
+/**
+ * @private
+ */ export const kUnstableCreateProtocol = Symbol("deno-redis.createProtocol");
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImh0dHBzOi8vZGVuby5sYW5kL3gvcmVkaXNAdjAuMzIuMC9pbnRlcm5hbC9zeW1ib2xzLnRzIl0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogQHByaXZhdGVcbiAqL1xuZXhwb3J0IGNvbnN0IGtVbnN0YWJsZVJlYWRSZXBseSA9IFN5bWJvbChcImRlbm8tcmVkaXMucmVhZFJlcGx5XCIpO1xuXG4vKipcbiAqIEBwcml2YXRlXG4gKi9cbmV4cG9ydCBjb25zdCBrVW5zdGFibGVQaXBlbGluZSA9IFN5bWJvbChcImRlbm8tcmVkaXMucGlwZWxpbmVcIik7XG5cbi8qKlxuICogQHByaXZhdGVcbiAqL1xuZXhwb3J0IGNvbnN0IGtVbnN0YWJsZUNyZWF0ZVByb3RvY29sID0gU3ltYm9sKFwiZGVuby1yZWRpcy5jcmVhdGVQcm90b2NvbFwiKTtcbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTs7Q0FFQyxHQUNELE9BQU8sTUFBTSxxQkFBcUIsT0FBTyx3QkFBd0I7QUFFakU7O0NBRUMsR0FDRCxPQUFPLE1BQU0sb0JBQW9CLE9BQU8sdUJBQXVCO0FBRS9EOztDQUVDLEdBQ0QsT0FBTyxNQUFNLDBCQUEwQixPQUFPLDZCQUE2QiJ9

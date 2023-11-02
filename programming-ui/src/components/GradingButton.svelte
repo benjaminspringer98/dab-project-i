@@ -49,8 +49,7 @@
       code: code,
     };
 
-    code = "";
-    const response = await fetch("/api/grade", {
+    const response = await fetch("/api/submission", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
