@@ -52,30 +52,8 @@ const getStatus = async (id) => {
     return false;
 }
 
-
-
 const findAllByUserUuid = async (userUuid) => {
     return await sql`SELECT * FROM programming_assignment_submissions WHERE user_uuid = ${userUuid};`;
-}
-
-const findCurrentAssignmentIdByUserUuid = async (userUuid) => {
-    // find id of last correctly submitted assignment
-    const rows = await sql`SELECT s.programming_assignment_id, a.assignment_order FROM programming_assignment_submissions s
-                            JOIN programming_assignments a ON s.programming_assignment_id = a.id 
-                            WHERE s.user_uuid = ${userUuid} AND s.correct = true ORDER BY a.assignment_order DESC LIMIT 1;`;
-
-    if (rows && rows.length > 0) {
-        // increment order number of last correct submission to get current assignment
-        const orderNumber = Number(rows[0].assignment_order) + 1;
-        console.log("orderNumber", orderNumber)
-
-        const row = await sql`SELECT id FROM programming_assignments WHERE assignment_order = ${orderNumber};`
-        return row[0].id;
-    }
-
-    // if no correct submissions, return id of first assignment
-    const firstAssignmentId = await sql`SELECT id FROM programming_assignments WHERE assignment_order = 1;`
-    return firstAssignmentId[0].id;
 }
 
 const findMatchingSubmission = async (assignmentId, code) => {
@@ -94,4 +72,4 @@ const update = async (id, graderFeedback, isCorrect) => {
     await sql`UPDATE programming_assignment_submissions SET grader_feedback = ${graderFeedback}, status = 'processed', correct = ${isCorrect} WHERE id = ${id};`;
 }
 
-export { add, findById, getStatus, userHasPendingSubmission, findAllByUserUuid, findCurrentAssignmentIdByUserUuid, findMatchingSubmission, update }
+export { add, findById, getStatus, userHasPendingSubmission, findAllByUserUuid, findMatchingSubmission, update }

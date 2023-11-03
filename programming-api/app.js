@@ -6,20 +6,19 @@ import { connect } from "https://deno.land/x/redis/mod.ts";
 
 const redis = await connect({ hostname: "redis", port: 6379 });
 
-const addSubmission = async (request) => {
-
+const addSubmission = async (request, urlPatternResult) => {
   const requestData = await request.json();
   console.log("requestData for /api/grade: ", requestData);
 
   if (await submissionService.userHasPendingSubmission(requestData.user)) {
     return new Response(JSON.stringify({ userHasPending: true }));
   }
-
-  const submissionId = await submissionService.add(requestData.assignment.id, requestData.code, requestData.user);
-
-  const assignment = await programmingAssignmentService.findById(requestData.assignment.id);
+  const assignmentId = urlPatternResult.pathname.groups.id;
+  const submissionId = await submissionService.add(assignmentId, requestData.code, requestData.user);
+  const assignment = await programmingAssignmentService.findById(assignmentId);
 
   const data = {
+    assignmentId: assignmentId,
     submissionId: submissionId,
     testCode: assignment.test_code,
     code: requestData.code,
@@ -33,31 +32,33 @@ const addSubmission = async (request) => {
 const fetchCurrentAssignment = async (request) => {
   const requestData = await request.json();
   console.log("requestData for /api/assignment: ", requestData);
-  const currentAssignmentId = await submissionService.findCurrentAssignmentIdByUserUuid(requestData.user);
+
+  const currentAssignmentId = await programmingAssignmentService.findCurrentAssignmentIdByUserUuid(requestData.user);
   console.log("currentAssignmentId: ", currentAssignmentId);
   const currentAssignment = await programmingAssignmentService.findById(currentAssignmentId);
+  const assignmentCount = await programmingAssignmentService.getCount();
   console.log("currentAssignment: ", currentAssignment);
-  return new Response(JSON.stringify(currentAssignment), {
+  return new Response(JSON.stringify({ currentAssignment, assignmentCount }), {
     headers: { "content-type": "application/json" },
   });
 }
 
 const updateSubmission = async (request, urlPatternResult) => {
-  const id = urlPatternResult.pathname.groups.id;
+  const submissionId = urlPatternResult.pathname.groups.sId;
   const requestData = await request.json();
-  await submissionService.update(id, requestData.graderFeedback, requestData.isCorrect);
+  console.log("requestData ", requestData)
+  await submissionService.update(submissionId, requestData.graderFeedback, requestData.isCorrect);
 }
 
 const getSubmissionStatus = async (request, urlPatternResult) => {
-  const id = urlPatternResult.pathname.groups.id;
-  console.log("getSubmissionStatus: ", id)
-  const status = await submissionService.getStatus(id);
+  const submissionId = urlPatternResult.pathname.groups.sId;
+  const status = await submissionService.getStatus(submissionId);
   if (status === "pending") {
     return new Response(JSON.stringify({ status }), {
       headers: { "content-type": "application/json" },
     });
   } else if (status === "processed") {
-    const submission = await submissionService.findById(id);
+    const submission = await submissionService.findById(submissionId);
     return new Response(JSON.stringify(submission), {
       headers: { "content-type": "application/json" },
     });
@@ -72,22 +73,22 @@ const getSubmissionStatus = async (request, urlPatternResult) => {
 const urlMapping = [
   {
     method: "POST",
-    pattern: new URLPattern({ pathname: "/submission" }),
+    pattern: new URLPattern({ pathname: "/assignments/:id/submissions" }),
     fn: addSubmission,
   },
   {
     method: "POST",
-    pattern: new URLPattern({ pathname: "/submission/:id" }),
+    pattern: new URLPattern({ pathname: "/assignments/:aId/submissions/:sId" }),
     fn: updateSubmission,
   },
   {
     method: "POST",
-    pattern: new URLPattern({ pathname: "/assignment" }),
+    pattern: new URLPattern({ pathname: "/assignments" }),
     fn: fetchCurrentAssignment,
   },
   {
     method: "GET",
-    pattern: new URLPattern({ pathname: "/submission/:id/status" }),
+    pattern: new URLPattern({ pathname: "/assignments/:aId/submissions/:sId/status" }),
     fn: getSubmissionStatus,
   },
 ]

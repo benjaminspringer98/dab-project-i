@@ -46,8 +46,7 @@ async function processQueue() {
       //console.log(`Code got result: ${result}`);
       const isCorrect = isCorrectResponse(graderFeedback);
 
-
-      const response = await fetch(`http://programming-api:7777/submission/${data.submissionId}`, {
+      const response = await fetch(`http://programming-api:7777/assignments/${data.assignmentId}/submissions/${data.submissionId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -65,8 +64,14 @@ async function processQueue() {
 processQueue();
 
 const isCorrectResponse = (result) => {
-  const lines = result.split('\n').map(line => line.trim());
+  const errorKeywords = ["error", "traceback"];
+  for (let keyword of errorKeywords) {
+    if (result.toLowerCase().includes(keyword)) {
+      return false;
+    }
+  }
 
+  const lines = result.split('\n').map(line => line.trim());
   // Check if any line is exactly "OK"
   for (let line of lines) {
     if (line === "OK") {

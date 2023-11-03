@@ -1,5 +1,10 @@
 <script>
   import { userUuid } from "../stores/stores.js";
+  import {
+    assignmentId,
+    assignmentOrder,
+    totalAssignments,
+  } from "../stores/assignmentStore.js";
 
   let code = "";
   let message = "";
@@ -12,14 +17,19 @@
       user: $userUuid,
     };
 
-    const response = await fetch("/api/assignment", {
+    const response = await fetch("/api/assignments", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
-    return await response.json();
+    const json = await response.json();
+    console.log(json);
+    $assignmentId = json.currentAssignment.id;
+    $assignmentOrder = json.currentAssignment.assignment_order;
+    $totalAssignments = json.assignmentCount;
+    return json;
   };
 
   let assignmentPromise = getAssignment();
@@ -33,17 +43,19 @@
     result = "";
     const data = {
       user: $userUuid,
-      assignment: await assignmentPromise,
       code: code,
     };
 
-    const response = await fetch("/api/submission", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
+    const response = await fetch(
+      `/api/assignments/${$assignmentId}/submissions`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      }
+    );
 
     const submission = await response.json();
     console.log(submission);
@@ -52,23 +64,24 @@
       message = "You have a currently pending submission. Please wait.";
       return;
     }
-    pollingManager.start(submission.submissionId, 1); // Replace 'submission-id' with actual ID, and X with the interval in seconds
+    pollingManager.start(submission.submissionId, 1);
   };
 
   const pollingManager = (() => {
     let intervals = new Map(); // Store interval IDs against submission IDs
 
-    const startPolling = (id, interval) => {
+    const startPolling = (submissionId, interval) => {
       // Clear any existing intervals for this ID to avoid duplicate polling
-      if (intervals.has(id)) {
-        clearInterval(intervals.get(id));
+      if (intervals.has(submissionId)) {
+        clearInterval(intervals.get(submissionId));
       }
 
-      // Define the polling function
       const poll = async () => {
         try {
           message = "Waiting for grading...";
-          const response = await fetch(`/api/submission/${id}/status`);
+          const response = await fetch(
+            `/api/assignments/${$assignmentId}/submissions/${submissionId}/status`
+          );
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
@@ -77,20 +90,23 @@
 
           // Stop polling if the submission is processed
           if (submission.status === "processed") {
-            clearInterval(intervals.get(id));
-            intervals.delete(id);
+            clearInterval(intervals.get(submissionId));
+            intervals.delete(submissionId);
             message = "";
-            console.log(`Processing complete for submission ${id}!`);
+            console.log(`Processing complete for submission ${submissionId}!`);
             result = submission;
           }
         } catch (error) {
-          console.error(`Failed to fetch submission status for ${id}:`, error);
+          console.error(
+            `Failed to fetch submission status for ${submissionId}:`,
+            error
+          );
           // Optionally clear the interval on error, or retry after a delay
         }
       };
 
       // Set up the interval and store the ID
-      intervals.set(id, setInterval(poll, interval * 1000));
+      intervals.set(submissionId, setInterval(poll, interval * 1000));
     };
 
     const stopPolling = (id) => {
@@ -109,9 +125,11 @@
 
 {#await assignmentPromise}
   <p>loading...</p>
-{:then assignment}
-  <h3>{assignment.title}</h3>
-  <p>{assignment.handout}</p>
+{:then promise}
+  <p>{$assignmentOrder}/{$totalAssignments}</p>
+  <p>id:{$assignmentId}</p>
+  <h3>{promise.currentAssignment.title}</h3>
+  <p>{promise.currentAssignment.handout}</p>
 {:catch error}
   <p>error: {error.message}</p>
 {/await}
@@ -132,12 +150,16 @@
 {#if result}
   {#if result.correct}
     <p>Correct!</p>
-    <button
-      class="bg-green-500 hover:bg-green-700 text-white font-bold p-4 rounded m-4"
-      on:click={getNextAssignment}
-    >
-      Next assignment
-    </button>
+    {#if $assignmentOrder < $totalAssignments}
+      <button
+        class="bg-green-500 hover:bg-green-700 text-white font-bold p-4 rounded m-4"
+        on:click={getNextAssignment}
+      >
+        Next assignment
+      </button>
+    {:else}
+      <p>You've done all the assignments. Congratz!</p>
+    {/if}
   {:else}
     <p>Incorrect</p>
     <p>{result.grader_feedback}</p>
