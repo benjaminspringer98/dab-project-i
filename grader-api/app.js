@@ -5,6 +5,8 @@ import { connect } from "https://deno.land/x/redis/mod.ts";
 
 const redis = await connect({ hostname: "redis", port: 6379 });
 
+
+
 const handleRequest = async (request) => {
   // the starting point for the grading api grades code following the
   // gradingDemo function, but does not e.g. use code from the user
@@ -29,6 +31,9 @@ const handleRequest = async (request) => {
   return new Response(JSON.stringify({ result: "moin" }));
 };
 
+const SERVER_ID = crypto.randomUUID();
+let counter = 0;
+
 async function processQueue() {
   while (true) {
     const serializedData = await redis.sendCommand("BRPOP", ["grading_queue", 10]);
@@ -36,10 +41,11 @@ async function processQueue() {
     if (serializedData) {
       const data = JSON.parse(serializedData[1]);
       console.log("found data in queue: ", data);
-
+      console.log(`SERVER ${SERVER_ID} grading submission with id: ${data.submissionId}`);
       const graderFeedback = await grade(data.code, data.testCode);
       //console.log(`Code got result: ${result}`);
       const isCorrect = isCorrectResponse(graderFeedback);
+
 
       const response = await fetch(`http://programming-api:7777/submission/${data.submissionId}`, {
         method: "POST",
@@ -48,10 +54,11 @@ async function processQueue() {
         },
         body: JSON.stringify({ graderFeedback, isCorrect }),
       });
-
+      counter++;
+    } else {
+      console.log("No data in queue, waiting...");
+      console.log(`SERVER ${SERVER_ID} counter ${counter}`);
     }
-
-    console.log("No data in queue, waiting...");
   }
 }
 

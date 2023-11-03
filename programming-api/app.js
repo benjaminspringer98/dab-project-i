@@ -7,8 +7,13 @@ import { connect } from "https://deno.land/x/redis/mod.ts";
 const redis = await connect({ hostname: "redis", port: 6379 });
 
 const addSubmission = async (request) => {
+
   const requestData = await request.json();
   console.log("requestData for /api/grade: ", requestData);
+
+  if (await submissionService.userHasPendingSubmission(requestData.user)) {
+    return new Response(JSON.stringify({ userHasPending: true }));
+  }
 
   const submissionId = await submissionService.add(requestData.assignment.id, requestData.code, requestData.user);
 
@@ -22,16 +27,7 @@ const addSubmission = async (request) => {
   // push into queue for grading instead of using grading api directly
   await redis.lpush("grading_queue", JSON.stringify(data));
 
-  // const response = await fetch("http://grader-api:7000/", {
-  //   method: "POST",
-  //   headers: {
-  //     "Content-Type": "application/json",
-  //   },
-  //   body: JSON.stringify(data),
-  // });
-
-  //return response;
-  return new Response(JSON.stringify({ result: "moin" }));
+  return new Response(JSON.stringify({ message: "received grading request", submissionId: submissionId }));
 };
 
 const fetchCurrentAssignment = async (request) => {
@@ -52,6 +48,27 @@ const updateSubmission = async (request, urlPatternResult) => {
   await submissionService.update(id, requestData.graderFeedback, requestData.isCorrect);
 }
 
+const getSubmissionStatus = async (request, urlPatternResult) => {
+  const id = urlPatternResult.pathname.groups.id;
+  console.log("getSubmissionStatus: ", id)
+  const status = await submissionService.getStatus(id);
+  if (status === "pending") {
+    return new Response(JSON.stringify({ status }), {
+      headers: { "content-type": "application/json" },
+    });
+  } else if (status === "processed") {
+    const submission = await submissionService.findById(id);
+    return new Response(JSON.stringify(submission), {
+      headers: { "content-type": "application/json" },
+    });
+  } else {
+    return new Response(JSON.stringify({ status: "unknown" }), {
+      headers: { "content-type": "application/json" },
+    });
+  }
+
+};
+
 const urlMapping = [
   {
     method: "POST",
@@ -67,6 +84,11 @@ const urlMapping = [
     method: "POST",
     pattern: new URLPattern({ pathname: "/assignment" }),
     fn: fetchCurrentAssignment,
+  },
+  {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/submission/:id/status" }),
+    fn: getSubmissionStatus,
   },
 ]
 

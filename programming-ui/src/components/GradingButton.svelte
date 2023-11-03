@@ -1,29 +1,13 @@
 <script>
   import { userUuid } from "../stores/stores.js";
 
-  //   const doSimpleGradingDemo = async () => {
-  //     const data = {
-  //       user: $userUuid,
-  //       code: `def hello():
-  //   return "helo world!"
-  // `,
-  //     };
+  let code = "";
+  let message = "";
+  let result = "";
 
-  //     code = "";
-
-  //     const response = await fetch("/api/grade", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(data),
-  //     });
-
-  //     const jsonData = await response.json();
-  //     console.log(jsonData);
-  //     alert(JSON.stringify(jsonData));
-  //   };
   const getAssignment = async () => {
+    code = "";
+    result = "";
     const data = {
       user: $userUuid,
     };
@@ -40,9 +24,13 @@
 
   let assignmentPromise = getAssignment();
 
-  let code = "";
+  const getNextAssignment = async () => {
+    assignmentPromise = getAssignment();
+  };
 
   const submit = async () => {
+    message = "Submitting...";
+    result = "";
     const data = {
       user: $userUuid,
       assignment: await assignmentPromise,
@@ -57,9 +45,66 @@
       body: JSON.stringify(data),
     });
 
-    const jsonData = await response.json();
-    alert(JSON.stringify(jsonData));
+    const submission = await response.json();
+    console.log(submission);
+
+    if (submission.userHasPending) {
+      message = "You have a currently pending submission. Please wait.";
+      return;
+    }
+    pollingManager.start(submission.submissionId, 1); // Replace 'submission-id' with actual ID, and X with the interval in seconds
   };
+
+  const pollingManager = (() => {
+    let intervals = new Map(); // Store interval IDs against submission IDs
+
+    const startPolling = (id, interval) => {
+      // Clear any existing intervals for this ID to avoid duplicate polling
+      if (intervals.has(id)) {
+        clearInterval(intervals.get(id));
+      }
+
+      // Define the polling function
+      const poll = async () => {
+        try {
+          message = "Waiting for grading...";
+          const response = await fetch(`/api/submission/${id}/status`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          const submission = await response.json();
+          console.log(submission);
+
+          // Stop polling if the submission is processed
+          if (submission.status === "processed") {
+            clearInterval(intervals.get(id));
+            intervals.delete(id);
+            message = "";
+            console.log(`Processing complete for submission ${id}!`);
+            result = submission;
+          }
+        } catch (error) {
+          console.error(`Failed to fetch submission status for ${id}:`, error);
+          // Optionally clear the interval on error, or retry after a delay
+        }
+      };
+
+      // Set up the interval and store the ID
+      intervals.set(id, setInterval(poll, interval * 1000));
+    };
+
+    const stopPolling = (id) => {
+      if (intervals.has(id)) {
+        clearInterval(intervals.get(id));
+        intervals.delete(id);
+      }
+    };
+
+    return {
+      start: startPolling,
+      stop: stopPolling,
+    };
+  })();
 </script>
 
 {#await assignmentPromise}
@@ -83,3 +128,18 @@
 >
   Submit code
 </button>
+<p>{message}</p>
+{#if result}
+  {#if result.correct}
+    <p>Correct!</p>
+    <button
+      class="bg-green-500 hover:bg-green-700 text-white font-bold p-4 rounded m-4"
+      on:click={getNextAssignment}
+    >
+      Next assignment
+    </button>
+  {:else}
+    <p>Incorrect</p>
+    <p>{result.grader_feedback}</p>
+  {/if}
+{/if}
