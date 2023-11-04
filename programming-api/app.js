@@ -6,6 +6,38 @@ import { connect } from "https://deno.land/x/redis/mod.ts";
 
 const redis = await connect({ hostname: "redis", port: 6379 });
 
+const getAllAssignments = async () => {
+  const assignments = await programmingAssignmentService.findAll();
+  console.log("assignments: ", assignments);
+  return new Response(JSON.stringify(assignments), {
+    headers: { "content-type": "application/json" },
+  });
+}
+
+const getAssignment = async (request, urlPatternResult) => {
+  const assignmentId = urlPatternResult.pathname.groups.id;
+  const assignment = await programmingAssignmentService.findById(assignmentId);
+  console.log("assignment: ", assignment);
+  return new Response(JSON.stringify(assignment), {
+    headers: { "content-type": "application/json" },
+  });
+}
+
+const fetchNextAssignment = async (request) => {
+  const requestData = await request.json();
+  console.log("requestData for /api/assignments/next: ", requestData);
+
+  console.log("order", requestData.order)
+  const nextAssignment = await programmingAssignmentService.findNextByOrder(requestData.order);
+  if (!nextAssignment) {
+    return new Response(JSON.stringify(false));
+  }
+
+  return new Response(JSON.stringify(nextAssignment), {
+    headers: { "content-type": "application/json" },
+  });
+}
+
 const addSubmission = async (request, urlPatternResult) => {
   const requestData = await request.json();
   console.log("requestData for /api/grade: ", requestData);
@@ -29,16 +61,16 @@ const addSubmission = async (request, urlPatternResult) => {
   return new Response(JSON.stringify({ message: "received grading request", submissionId: submissionId }));
 };
 
-const fetchCurrentAssignment = async (request) => {
+const fetchNextUncompletedAssignment = async (request) => {
   const requestData = await request.json();
   console.log("requestData for /api/assignment: ", requestData);
 
-  const currentAssignmentId = await programmingAssignmentService.findCurrentAssignmentIdByUserUuid(requestData.user);
-  console.log("currentAssignmentId: ", currentAssignmentId);
+  const currentAssignmentId = await programmingAssignmentService.findNextUncompletedForUser(requestData.user);
+  if (!currentAssignmentId) {
+    return new Response(JSON.stringify(false));
+  }
   const currentAssignment = await programmingAssignmentService.findById(currentAssignmentId);
-  const assignmentCount = await programmingAssignmentService.getCount();
-  console.log("currentAssignment: ", currentAssignment);
-  return new Response(JSON.stringify({ currentAssignment, assignmentCount }), {
+  return new Response(JSON.stringify(currentAssignment), {
     headers: { "content-type": "application/json" },
   });
 }
@@ -57,6 +89,16 @@ const calculateUserPoints = async (request) => {
   const points = await submissionService.getPoints(requestData.user);
   console.log("points: ", points)
   return new Response(JSON.stringify({ points }), {
+    headers: { "content-type": "application/json" },
+  });
+}
+
+const hasUserCompleted = async (request, urlPatternResult) => {
+  const assignmentId = urlPatternResult.pathname.groups.id;
+  const requestData = await request.json();
+
+  const hasCompleted = await programmingAssignmentService.hasUserCompleted(assignmentId, requestData.user);
+  return new Response(JSON.stringify(hasCompleted), {
     headers: { "content-type": "application/json" },
   });
 }
@@ -83,6 +125,26 @@ const getSubmissionStatus = async (request, urlPatternResult) => {
 
 const urlMapping = [
   {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/assignments" }),
+    fn: getAllAssignments,
+  },
+  {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/assignments/:id" }),
+    fn: getAssignment,
+  },
+  {
+    method: "POST",
+    pattern: new URLPattern({ pathname: "/assignments/:id/isCompleted" }),
+    fn: hasUserCompleted,
+  },
+  {
+    method: "POST",
+    pattern: new URLPattern({ pathname: "/assignments/next" }),
+    fn: fetchNextAssignment,
+  },
+  {
     method: "POST",
     pattern: new URLPattern({ pathname: "/assignments/:id/submissions" }),
     fn: addSubmission,
@@ -95,7 +157,7 @@ const urlMapping = [
   {
     method: "POST",
     pattern: new URLPattern({ pathname: "/assignments" }),
-    fn: fetchCurrentAssignment,
+    fn: fetchNextUncompletedAssignment,
   },
   {
     method: "GET",

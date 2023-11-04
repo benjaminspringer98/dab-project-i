@@ -1,5 +1,9 @@
 ---
 import Header from "./Header.svelte";
+import AssignmentList from "../components/AssignmentList.svelte";
+
+const assignmentsRes = await fetch("http://programming-api:7777/assignments");
+const assignments = await assignmentsRes.json();
 ---
 
 <html lang="en">
@@ -8,6 +12,9 @@ import Header from "./Header.svelte";
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
+    <script
+      src="https://kit.fontawesome.com/1d46db14be.js"
+      crossorigin="anonymous"></script>
     <title>Programming assignments</title>
   </head>
   <body>
@@ -15,5 +22,6 @@ import Header from "./Header.svelte";
     <div class="container mx-auto">
       <slot />
     </div>
+    <AssignmentList {assignments} />
   </body>
 </html>

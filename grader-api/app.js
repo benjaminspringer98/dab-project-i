@@ -55,8 +55,8 @@ async function processQueue() {
       });
       counter++;
     } else {
-      console.log("No data in queue, waiting...");
-      console.log(`SERVER ${SERVER_ID} counter ${counter}`);
+      //console.log("No data in queue, waiting...");
+      //console.log(`SERVER ${SERVER_ID} counter ${counter}`);
     }
   }
 }

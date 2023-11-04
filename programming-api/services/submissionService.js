@@ -22,7 +22,7 @@ const add = async (assignmentId, code, userUuid) => {
                     RETURNING id;`;
 
     } else {
-        // if no matching submission found, add new submission with status pending
+        // if no matching submission found, add new submission with status pending by default
         console.log("no matching submission found");
         created = await sql`INSERT INTO programming_assignment_submissions (programming_assignment_id, code, user_uuid) 
                     VALUES (${assignmentId}, ${code}, ${userUuid})

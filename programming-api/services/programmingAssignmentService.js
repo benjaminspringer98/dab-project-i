@@ -14,6 +14,16 @@ const findById = async (id) => {
   return false;
 }
 
+const findNextByOrder = async (order) => {
+  const rows = await sql`SELECT * FROM programming_assignments WHERE assignment_order = ${Number(order) + 1};`;
+
+  if (rows && rows.length > 0) {
+    return rows[0];
+  }
+
+  return false;
+}
+
 // could be cached
 const getCount = async () => {
   const rows = await sql`SELECT COUNT(*) FROM programming_assignments;`
@@ -21,31 +31,36 @@ const getCount = async () => {
 }
 
 // could maybe be cached? have to be really careful though
-const findCurrentAssignmentIdByUserUuid = async (userUuid) => {
-  const row = await sql`SELECT id FROM programming_assignments WHERE assignment_order = 1;`
-  const firstAssignmentId = row[0].id;
+const findNextUncompletedForUser = async (userUuid) => {
+  const rows = await sql`SELECT a.id
+    FROM programming_assignments a
+    LEFT JOIN (
+      SELECT programming_assignment_id, BOOL_OR(correct) as has_correct_submission
+      FROM programming_assignment_submissions
+      WHERE user_uuid = ${userUuid}
+      GROUP BY programming_assignment_id
+    ) as s ON a.id = s.programming_assignment_id
+    WHERE s.has_correct_submission IS FALSE OR s.has_correct_submission IS NULL
+    ORDER BY a.assignment_order ASC
+    LIMIT 1;`
 
-  // find id of last correctly submitted assignment
-  const rows = await sql`SELECT s.programming_assignment_id, a.assignment_order FROM programming_assignment_submissions s
-                          JOIN programming_assignments a ON s.programming_assignment_id = a.id 
-                          WHERE s.user_uuid = ${userUuid} AND s.correct = true ORDER BY a.assignment_order DESC LIMIT 1;`;
-
-  // correct submission found
   if (rows && rows.length > 0) {
-    // increment order number of last correct submission to get current assignment
-    const orderNumber = Number(rows[0].assignment_order) + 1;
-    console.log("orderNumber", orderNumber)
-
-    const row = await sql`SELECT id FROM programming_assignments WHERE assignment_order = ${orderNumber};`
-    console.log("row", row)
-
-    if (row && row.length > 0) {
-      return row[0].id;
-    }
+    return rows[0].id;
   }
 
-  // if no correct submissions, return id of first assignment
-  return firstAssignmentId;
+  // all assignments successfully completed
+  return false;
+}
+
+const hasUserCompleted = async (id, userUuid) => {
+  const rows = await sql`SELECT * FROM programming_assignment_submissions 
+    WHERE programming_assignment_id = ${id} AND user_uuid = ${userUuid} AND correct;`;
+
+  if (rows && rows.length > 0) {
+    return true;
+  }
+
+  return false;
 }
 
 const findByOrder = async (order) => {
@@ -58,4 +73,4 @@ const findByOrder = async (order) => {
   return false;
 }
 
-export { findAll, findById, getCount, findCurrentAssignmentIdByUserUuid, findByOrder };
+export { findAll, findById, getCount, findNextUncompletedForUser, findByOrder, findNextByOrder, hasUserCompleted };

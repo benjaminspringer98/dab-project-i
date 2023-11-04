@@ -1,0 +1,32 @@
+---
+export const prerender = true;
+
+import Layout from "../../layout/Layout.astro";
+import AssignmentInfo from "../../components/AssignmentInfo.svelte";
+import GradingForm from "../../components/GradingForm.svelte";
+import AssignmentList from "../../components/AssignmentList.svelte";
+
+export const getStaticPaths = async () => {
+    const response = await fetch("http://programming-api:7777/assignments");
+    const assignments = await response.json();
+    const ids = assignments.map((assignment) => assignment.id);
+    const paths = ids.map((id) => ({ params: { id: id.toString() } }));
+    return paths;
+};
+
+const id = Astro.params.id;
+
+const assignmentRes = await fetch(
+    `http://programming-api:7777/assignments/${id}`,
+);
+const assignment = await assignmentRes.json();
+
+const assignmentsRes = await fetch("http://programming-api:7777/assignments");
+const assignments = await assignmentsRes.json();
+const assignmentCount = assignments.length;
+---
+
+<Layout>
+    <AssignmentInfo {assignment} {assignmentCount} />
+    <GradingForm {assignment} {assignmentCount} client:load />
+</Layout>

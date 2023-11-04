@@ -1,8 +1,12 @@
 ---
 import Layout from "../layout/Layout.astro";
-import GradingButton from "../components/GradingButton.svelte";
+import Welcome from "../components/Welcome.svelte";
+import GradingButton from "../components/GradingForm.svelte";
 ---
 
 <Layout>
-  <GradingButton client:load />
+  <h1>Programming Assignments</h1>
+  <p>Here you can practice solving different Python assignments.</p>
+
+  <Welcome client:load />
 </Layout>

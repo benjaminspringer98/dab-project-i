@@ -1,58 +1,54 @@
 <script>
+  import { onMount } from "svelte";
   import { userUuid } from "../stores/stores.js";
   import { points } from "../stores/pointStore.js";
-  import {
-    assignmentId,
-    assignmentOrder,
-    totalAssignments,
-  } from "../stores/assignmentStore.js";
+  import { getPoints } from "../utils/getPoints.js";
+  import { nextAssignmentId } from "../stores/assignmentStore.js";
+
+  export let assignment;
+  export let assignmentCount;
 
   let code = "";
   let message = "";
   let result = "";
 
-  const getPoints = async (user) => {
-    const response = await fetch(`/api/points`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ user: $userUuid }),
-    });
-
-    const json = await response.json();
-    console.log(json);
-    return json.points;
-  };
-
-  const getAssignment = async () => {
+  onMount(async () => {
     $points = await getPoints($userUuid);
-    code = "";
-    result = "";
-    const data = {
-      user: $userUuid,
-    };
+    const nextAssignment = await getNextAssignment(assignment.assignment_order);
+    $nextAssignmentId = nextAssignment.id;
+  });
 
-    const response = await fetch("/api/assignments", {
+  const getNextAssignment = async (order) => {
+    const response = await fetch("/api/assignments/next", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ order }),
     });
     const json = await response.json();
-    console.log(json);
-    $assignmentId = json.currentAssignment.id;
-    $assignmentOrder = json.currentAssignment.assignment_order;
-    $totalAssignments = json.assignmentCount;
+    console.log("json", json);
     return json;
   };
 
-  let assignmentPromise = getAssignment();
-
-  const getNextAssignment = async () => {
-    assignmentPromise = getAssignment();
+  const isCompleted = async () => {
+    const data = {
+      user: $userUuid,
+    };
+    const response = await fetch(
+      `/api/assignments/${assignment.id}/isCompleted`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      }
+    );
+    return await response.json();
   };
+
+  let isCompletedPromise = isCompleted();
 
   const submit = async () => {
     message = "Submitting...";
@@ -63,7 +59,7 @@
     };
 
     const response = await fetch(
-      `/api/assignments/${$assignmentId}/submissions`,
+      `/api/assignments/${assignment.id}/submissions`,
       {
         method: "POST",
         headers: {
@@ -96,7 +92,7 @@
         try {
           message = "Waiting for grading...";
           const response = await fetch(
-            `/api/assignments/${$assignmentId}/submissions/${submissionId}/status`
+            `/api/assignments/${assignment.id}/submissions/${submissionId}/status`
           );
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -110,7 +106,7 @@
             intervals.delete(submissionId);
 
             $points = await getPoints($userUuid);
-
+            isCompletedPromise = isCompleted();
             message = "";
             console.log(`Processing complete for submission ${submissionId}!`);
             result = submission;
@@ -142,15 +138,19 @@
   })();
 </script>
 
-{#await assignmentPromise}
-  <p>loading...</p>
-{:then promise}
-  <p>{$assignmentOrder}/{$totalAssignments}</p>
-  <p>id:{$assignmentId}</p>
-  <h3>{promise.currentAssignment.title}</h3>
-  <p>{promise.currentAssignment.handout}</p>
-{:catch error}
-  <p>error: {error.message}</p>
+{#await isCompletedPromise}
+  <p>Loading...</p>
+{:then isCompleted}
+  {#if isCompleted}
+    <span>You have completed this assignment</span>
+    <i
+      class="fa-solid fa-check text-green-400 fa-xl"
+      width="50px"
+      height="50px"
+    />
+  {:else}
+    <p>You have not yet completed this assignment</p>
+  {/if}
 {/await}
 
 <textarea
@@ -170,12 +170,19 @@
   {#if result.correct}
     <p>Correct!</p>
 
-    <button
-      class="bg-green-500 hover:bg-green-700 text-white font-bold p-4 rounded m-4"
-      on:click={getNextAssignment}
-    >
-      Next assignment
-    </button>
+    {#if assignment.assignment_order < assignmentCount}
+      <a
+        class="bg-green-500 hover:bg-green-700 text-white font-bold p-4 rounded m-4"
+        href={`/assignments/${$nextAssignmentId}`}
+      >
+        Next assignment
+      </a>
+    {:else}
+      <p>
+        That was the last assignment in the set. You can continue to choose
+        assignments from the list.
+      </p>
+    {/if}
   {:else}
     <p>Incorrect</p>
     <p>{result.grader_feedback}</p>
