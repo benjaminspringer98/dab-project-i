@@ -1,5 +1,6 @@
 <script>
   import { userUuid } from "../stores/stores.js";
+  import { points } from "../stores/pointStore.js";
   import {
     assignmentId,
     assignmentOrder,
@@ -10,7 +11,22 @@
   let message = "";
   let result = "";
 
+  const getPoints = async (user) => {
+    const response = await fetch(`/api/points`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ user: $userUuid }),
+    });
+
+    const json = await response.json();
+    console.log(json);
+    return json.points;
+  };
+
   const getAssignment = async () => {
+    $points = await getPoints($userUuid);
     code = "";
     result = "";
     const data = {
@@ -92,6 +108,9 @@
           if (submission.status === "processed") {
             clearInterval(intervals.get(submissionId));
             intervals.delete(submissionId);
+
+            $points = await getPoints($userUuid);
+
             message = "";
             console.log(`Processing complete for submission ${submissionId}!`);
             result = submission;
@@ -150,16 +169,13 @@
 {#if result}
   {#if result.correct}
     <p>Correct!</p>
-    {#if $assignmentOrder < $totalAssignments}
-      <button
-        class="bg-green-500 hover:bg-green-700 text-white font-bold p-4 rounded m-4"
-        on:click={getNextAssignment}
-      >
-        Next assignment
-      </button>
-    {:else}
-      <p>You've done all the assignments. Congratz!</p>
-    {/if}
+
+    <button
+      class="bg-green-500 hover:bg-green-700 text-white font-bold p-4 rounded m-4"
+      on:click={getNextAssignment}
+    >
+      Next assignment
+    </button>
   {:else}
     <p>Incorrect</p>
     <p>{result.grader_feedback}</p>

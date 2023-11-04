@@ -72,4 +72,12 @@ const update = async (id, graderFeedback, isCorrect) => {
     await sql`UPDATE programming_assignment_submissions SET grader_feedback = ${graderFeedback}, status = 'processed', correct = ${isCorrect} WHERE id = ${id};`;
 }
 
-export { add, findById, getStatus, userHasPendingSubmission, findAllByUserUuid, findMatchingSubmission, update }
+const getPoints = async (userUuid) => {
+    const rows = await sql`SELECT COUNT(DISTINCT a.id) * 100 AS points
+                        FROM programming_assignment_submissions s 
+                        JOIN programming_assignments a ON s.programming_assignment_id = a.id 
+                        WHERE user_uuid = ${userUuid} AND correct = true;`;
+    return rows[0].points;
+}
+
+export { add, findById, getStatus, userHasPendingSubmission, findAllByUserUuid, findMatchingSubmission, update, getPoints }

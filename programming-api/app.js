@@ -50,6 +50,17 @@ const updateSubmission = async (request, urlPatternResult) => {
   await submissionService.update(submissionId, requestData.graderFeedback, requestData.isCorrect);
 }
 
+const calculateUserPoints = async (request) => {
+  const requestData = await request.json();
+  console.log("requestData for /api/points: ", requestData);
+
+  const points = await submissionService.getPoints(requestData.user);
+  console.log("points: ", points)
+  return new Response(JSON.stringify({ points }), {
+    headers: { "content-type": "application/json" },
+  });
+}
+
 const getSubmissionStatus = async (request, urlPatternResult) => {
   const submissionId = urlPatternResult.pathname.groups.sId;
   const status = await submissionService.getStatus(submissionId);
@@ -90,6 +101,11 @@ const urlMapping = [
     method: "GET",
     pattern: new URLPattern({ pathname: "/assignments/:aId/submissions/:sId/status" }),
     fn: getSubmissionStatus,
+  },
+  {
+    method: "POST",
+    pattern: new URLPattern({ pathname: "/points" }),
+    fn: calculateUserPoints,
   },
 ]
 
