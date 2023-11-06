@@ -18,6 +18,8 @@ TODO: The RUNNING.md briefly outlines steps needed to run the application.
 
 ## Tests
 
+### End-to-End Tests
+
 - first run `docker compose up` in one terminal
 - then run E2E tests with Playwright in another terminal:
   `docker-compose run --entrypoint=npx e2e-playwright playwright test && docker-compose rm -sf`
@@ -34,3 +36,8 @@ TODO: The RUNNING.md briefly outlines steps needed to run the application.
     `Error: browserType.launch: Executable doesn't exist at /ms-playwright/chromium-1080/chrome-linux/chrome`
   - if you run into any problems, try removing the above mentioned line and
     building the image again
+
+### Performance tests
+
+1. run `docker compose up` in one terminal
+2. another terminal: cd into k6 folder and run `k6 run <test-file>`

@@ -217,7 +217,7 @@
       {#if assignment.assignment_order < assignmentCount}
         <a
           id="nextAssignment"
-          class="bg-green-600 hover:bg-green-700 text-white font-bold p-4 rounded m-4"
+          class="bg-green-600 hover:bg-green-700 text-white font-bold p-4 m-4 rounded"
           href={`/assignments/${$nextAssignmentId}`}
         >
           Next assignment

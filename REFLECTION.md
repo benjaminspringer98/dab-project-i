@@ -64,14 +64,6 @@ the performance of the application.
   assignments during runtime (apart from directly creating new ones in the
   database).
 
-## Caching
-
-- Redis is also used as a cache for DB operations
-- cache purging mechanism are in place, when data is updated or modified (i.e.
-  assignments are submitted / submissions are updated)
-- uses second Redis instance, to not delete data from message queue, when cache
-  gets purged
-
 ## Future outlook: Improving performance
 
 - Alluding to lecture 3: Instead of passing the complete test code into the

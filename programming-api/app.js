@@ -5,7 +5,7 @@ import { cacheMethodCalls } from "./utils/cacheUtils.js";
 
 const redis = await connect({ hostname: "redis-queue", port: 6379 });
 
-const cachedProgrammingAssignmentService = cacheMethodCalls(programmingAssignmentService, ["create", "deleteById"]);
+const cachedProgrammingAssignmentService = cacheMethodCalls(programmingAssignmentService, []);
 const cachedSubmissionService = cacheMethodCalls(submissionService, ["add", "update"]);
 
 
