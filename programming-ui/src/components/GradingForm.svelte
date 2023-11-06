@@ -137,6 +137,25 @@
       stop: stopPolling,
     };
   })();
+
+  const handleKeyDown = (event) => {
+    if (event.key === "Tab") {
+      event.preventDefault();
+
+      const textarea = event.target;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+
+      // Insert tab at cursor position
+      textarea.value =
+        textarea.value.substring(0, start) +
+        "\t" +
+        textarea.value.substring(end);
+
+      // Update the cursor to be after the inserted tab
+      textarea.selectionStart = textarea.selectionEnd = start + 1;
+    }
+  };
 </script>
 
 {#await isCompletedPromise}
@@ -155,9 +174,11 @@
 <textarea
   id="code"
   bind:value={code}
-  rows="4"
+  rows="10"
   cols="50"
-  class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300"
+  class="form-textarea m-5 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2 bg-gray-800 text-white font-mono text-sm leading-6"
+  placeholder="Your code"
+  on:keydown={handleKeyDown}
 />
 <button
   id="submitBtn"
@@ -177,7 +198,7 @@
 {#if warningText}
   <div
     id="warnings"
-    class="p-4 mb-4 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-gray-800 dark:text-yellow-300"
+    class="p-4 mb-4 text-sm text-yellow-800 rounded-lg bg-yellow-50"
   >
     <p id="warningText">{warningText}</p>
   </div>
@@ -188,7 +209,7 @@
     {#if result.correct}
       <p
         id="resultText"
-        class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400"
+        class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50"
       >
         Correct!
       </p>
@@ -208,9 +229,7 @@
         </p>
       {/if}
     {:else}
-      <div
-        class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
-      >
+      <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50">
         <p id="resultText">Incorrect</p>
         <p id="graderFeedback">{result.grader_feedback}</p>
       </div>
