@@ -1,7 +1,7 @@
 import http from "k6/http";
 
 export const options = {
-    duration: "3s",
+    duration: "1s",
     vus: 1,
     summaryTrendStats: ["avg", "p(99)"],
 };
@@ -9,12 +9,10 @@ export const options = {
 export default function () {
     const data = {
         user: randomString(10),
-        assignment: { id: 1 },
         code: randomString(50),
     };
-    http.get("http://localhost:7800");
     http.post(
-        "http://localhost:7800/api/submission",
+        `http://localhost:7800/api/assignments/1/submissions`,
         JSON.stringify(data)
     );
 }

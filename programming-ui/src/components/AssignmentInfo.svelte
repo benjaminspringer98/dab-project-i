@@ -3,9 +3,9 @@
     export let assignmentCount;
 </script>
 
-<h1 class="text-2xl font-serif mb-4">
+<h2 class="text-2xl font-bold">
     Assignment {assignment.assignment_order}/{assignmentCount}
-</h1>
+</h2>
 
-<p>{assignment.title}</p>
-<p>{assignment.handout}</p>
+<h3 id="title" class="text-xl mt-2">{assignment.title}</h3>
+<p id="handout" class="mt-2">{assignment.handout}</p>

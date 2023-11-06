@@ -42,8 +42,10 @@ async function processQueue() {
       const data = JSON.parse(serializedData[1]);
       console.log("found data in queue: ", data);
       console.log(`SERVER ${SERVER_ID} grading submission with id: ${data.submissionId}`);
+      let date = new Date();
+      console.log("date: ", date);
+
       const graderFeedback = await grade(data.code, data.testCode);
-      //console.log(`Code got result: ${result}`);
       const isCorrect = isCorrectResponse(graderFeedback);
 
       const response = await fetch(`http://programming-api:7777/assignments/${data.assignmentId}/submissions/${data.submissionId}`, {
@@ -55,8 +57,8 @@ async function processQueue() {
       });
       counter++;
     } else {
-      //console.log("No data in queue, waiting...");
-      //console.log(`SERVER ${SERVER_ID} counter ${counter}`);
+      console.log("No data in queue, waiting...");
+      console.log(`SERVER ${SERVER_ID} counter ${counter}`);
     }
   }
 }

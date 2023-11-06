@@ -4,7 +4,7 @@ export const prerender = true;
 import Layout from "../../layout/Layout.astro";
 import AssignmentInfo from "../../components/AssignmentInfo.svelte";
 import GradingForm from "../../components/GradingForm.svelte";
-import AssignmentList from "../../components/AssignmentList.svelte";
+import AssignmentList from "../../layout/AssignmentList.svelte";
 
 export const getStaticPaths = async () => {
     const response = await fetch("http://programming-api:7777/assignments");

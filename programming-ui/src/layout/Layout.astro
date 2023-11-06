@@ -1,6 +1,6 @@
 ---
 import Header from "./Header.svelte";
-import AssignmentList from "../components/AssignmentList.svelte";
+import AssignmentList from "./AssignmentList.svelte";
 
 const assignmentsRes = await fetch("http://programming-api:7777/assignments");
 const assignments = await assignmentsRes.json();
@@ -17,11 +17,13 @@ const assignments = await assignmentsRes.json();
       crossorigin="anonymous"></script>
     <title>Programming assignments</title>
   </head>
-  <body>
+  <body class="h-full">
     <Header client:only={"svelte"} />
-    <div class="container mx-auto">
-      <slot />
+    <div class="flex flex-row">
+      <AssignmentList class="basis-2/6 h-full" {assignments} client:load />
+      <div class="container mx-auto basis-4/6">
+        <slot />
+      </div>
     </div>
-    <AssignmentList {assignments} />
   </body>
 </html>

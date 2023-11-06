@@ -9,8 +9,16 @@
   export let assignmentCount;
 
   let code = "";
-  let message = "";
+  let warningText = "";
   let result = "";
+
+  const States = {
+    IS_IDLE: "IS_IDLE",
+    IS_SUBMITTING: "IS_SUBMITTING",
+    IS_GRADING: "IS_GRADING",
+  };
+
+  let state = States.IS_IDLE;
 
   onMount(async () => {
     $points = await getPoints($userUuid);
@@ -26,9 +34,7 @@
       },
       body: JSON.stringify({ order }),
     });
-    const json = await response.json();
-    console.log("json", json);
-    return json;
+    return await response.json();
   };
 
   const isCompleted = async () => {
@@ -51,7 +57,8 @@
   let isCompletedPromise = isCompleted();
 
   const submit = async () => {
-    message = "Submitting...";
+    state = States.IS_SUBMITTING;
+    warningText = "";
     result = "";
     const data = {
       user: $userUuid,
@@ -73,24 +80,25 @@
     console.log(submission);
 
     if (submission.userHasPending) {
-      message = "You have a currently pending submission. Please wait.";
+      warningText = "You already have a pending submission";
+      state = States.IS_IDLE;
       return;
     }
-    pollingManager.start(submission.submissionId, 1);
+    // Short poll submission status every 2 seconds
+    pollingManager.start(submission.submissionId, 2);
   };
 
   const pollingManager = (() => {
-    let intervals = new Map(); // Store interval IDs against submission IDs
+    let intervals = new Map();
 
     const startPolling = (submissionId, interval) => {
-      // Clear any existing intervals for this ID to avoid duplicate polling
       if (intervals.has(submissionId)) {
         clearInterval(intervals.get(submissionId));
       }
 
       const poll = async () => {
         try {
-          message = "Waiting for grading...";
+          state = States.IS_GRADING;
           const response = await fetch(
             `/api/assignments/${assignment.id}/submissions/${submissionId}/status`
           );
@@ -98,7 +106,6 @@
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
           const submission = await response.json();
-          console.log(submission);
 
           // Stop polling if the submission is processed
           if (submission.status === "processed") {
@@ -107,20 +114,14 @@
 
             $points = await getPoints($userUuid);
             isCompletedPromise = isCompleted();
-            message = "";
-            console.log(`Processing complete for submission ${submissionId}!`);
+            state = States.IS_IDLE;
             result = submission;
           }
         } catch (error) {
-          console.error(
-            `Failed to fetch submission status for ${submissionId}:`,
-            error
-          );
-          // Optionally clear the interval on error, or retry after a delay
+          console.error(error);
         }
       };
 
-      // Set up the interval and store the ID
       intervals.set(submissionId, setInterval(poll, interval * 1000));
     };
 
@@ -139,52 +140,80 @@
 </script>
 
 {#await isCompletedPromise}
-  <p>Loading...</p>
+  <i class="fa-solid fa-spinner fa-spin fa-xl" />
 {:then isCompleted}
   {#if isCompleted}
-    <span>You have completed this assignment</span>
+    <span>(You have completed this assignment)</span>
     <i
       class="fa-solid fa-check text-green-400 fa-xl"
       width="50px"
       height="50px"
     />
-  {:else}
-    <p>You have not yet completed this assignment</p>
   {/if}
 {/await}
 
 <textarea
+  id="code"
   bind:value={code}
   rows="4"
   cols="50"
   class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300"
 />
 <button
+  id="submitBtn"
   class="bg-blue-500 hover:bg-blue-700 text-white font-bold p-4 rounded m-4"
   on:click={submit}
 >
   Submit code
 </button>
-<p>{message}</p>
-{#if result}
-  {#if result.correct}
-    <p>Correct!</p>
+{#if state === States.IS_SUBMITTING}
+  <span>Submitting code</span>
+  <i class="fa-solid fa-spinner fa-spin fa-xl m-2" />
+{:else if state === States.IS_GRADING}
+  <span>Waiting for grading</span>
+  <i class="fa-solid fa-spinner fa-spin fa-xl m-2" />
+{/if}
 
-    {#if assignment.assignment_order < assignmentCount}
-      <a
-        class="bg-green-500 hover:bg-green-700 text-white font-bold p-4 rounded m-4"
-        href={`/assignments/${$nextAssignmentId}`}
+{#if warningText}
+  <div
+    id="warnings"
+    class="p-4 mb-4 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-gray-800 dark:text-yellow-300"
+  >
+    <p id="warningText">{warningText}</p>
+  </div>
+{/if}
+
+{#if result}
+  <div id="result">
+    {#if result.correct}
+      <p
+        id="resultText"
+        class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400"
       >
-        Next assignment
-      </a>
-    {:else}
-      <p>
-        That was the last assignment in the set. You can continue to choose
-        assignments from the list.
+        Correct!
       </p>
+
+      {#if assignment.assignment_order < assignmentCount}
+        <a
+          id="nextAssignment"
+          class="bg-green-600 hover:bg-green-700 text-white font-bold p-4 rounded m-4"
+          href={`/assignments/${$nextAssignmentId}`}
+        >
+          Next assignment
+        </a>
+      {:else}
+        <p>
+          That was the last assignment in the set. You can continue to choose
+          assignments from the list.
+        </p>
+      {/if}
+    {:else}
+      <div
+        class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+      >
+        <p id="resultText">Incorrect</p>
+        <p id="graderFeedback">{result.grader_feedback}</p>
+      </div>
     {/if}
-  {:else}
-    <p>Incorrect</p>
-    <p>{result.grader_feedback}</p>
-  {/if}
+  </div>
 {/if}
