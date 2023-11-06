@@ -13,7 +13,7 @@
             user: $userUuid,
         };
 
-        const response = await fetch("/api/assignments", {
+        const response = await fetch("/api/assignments/nextUncompleted", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

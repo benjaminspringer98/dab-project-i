@@ -3,7 +3,7 @@ import { grade } from "./services/gradingService.js";
 
 import { connect } from "https://deno.land/x/redis/mod.ts";
 
-const redis = await connect({ hostname: "redis", port: 6379 });
+const redis = await connect({ hostname: "redis-queue", port: 6379 });
 
 const SERVER_ID = crypto.randomUUID();
 let counter = 0;

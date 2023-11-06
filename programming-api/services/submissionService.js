@@ -3,7 +3,6 @@ import { sql } from "../database/database.js";
 const userHasPendingSubmission = async (userUuid) => {
     const rows = await sql`SELECT status FROM programming_assignment_submissions WHERE user_uuid = ${userUuid} AND status = 'pending';`;
 
-    console.log("rows", rows)
     if (rows && rows.length > 0) {
         return rows[0].status === "pending";
     }
