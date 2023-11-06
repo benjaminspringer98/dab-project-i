@@ -38,7 +38,7 @@ test("Providing the correct answer increases user points", async ({ page }) => {
   await page.locator("#code").type(code);
   await page.locator("#submitBtn").click();
 
-  await expect(page.locator("#points")).not.toHaveText(points);
+  await expect(page.locator("#points")).not.toHaveText(`${points}`);
 });
 
 test("Providing wrong answer does not increase user points", async ({ page }) => {
@@ -48,7 +48,7 @@ test("Providing wrong answer does not increase user points", async ({ page }) =>
   await page.locator("#code").type(code);
   await page.locator("#submitBtn").click();
 
-  await expect(page.locator("#points")).toHaveText(points);
+  await expect(page.locator("#points")).toHaveText(`${points}`);
 });
 
 const randomString = (length) => {

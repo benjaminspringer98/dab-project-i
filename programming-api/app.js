@@ -1,8 +1,6 @@
 import * as programmingAssignmentService from "./services/programmingAssignmentService.js";
 import * as submissionService from "./services/submissionService.js";
-import { serve } from "./deps.js";
-
-import { connect } from "https://deno.land/x/redis/mod.ts";
+import { serve, connect } from "./deps.js";
 
 const redis = await connect({ hostname: "redis", port: 6379 });
 

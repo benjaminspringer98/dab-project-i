@@ -6,7 +6,9 @@
   <a class="text-2xl font-serif ml-1" href="/"
     >Home <i class="fa-solid fa-house fa-sm" /></a
   >
-  <span class="absolute right-0 mr-8 text-2xl text-gray-700 font-serif"
+  <span
+    id="points"
+    class="absolute right-0 mr-8 text-2xl text-gray-700 font-serif"
     >Current points: {$points}</span
   >
 </nav>
