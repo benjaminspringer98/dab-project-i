@@ -5,7 +5,7 @@ import { cacheMethodCalls } from "./utils/cacheUtils.js";
 
 const redis = await connect({ hostname: "redis-queue", port: 6379 });
 
-const cachedProgrammingAssignmentService = cacheMethodCalls(programmingAssignmentService, []);
+const cachedProgrammingAssignmentService = cacheMethodCalls(programmingAssignmentService, [""]);
 const cachedSubmissionService = cacheMethodCalls(submissionService, ["add", "update"]);
 
 
@@ -80,7 +80,7 @@ const fetchNextUncompletedAssignment = async (request) => {
 const updateSubmission = async (request, urlPatternResult) => {
   const submissionId = urlPatternResult.pathname.groups.sId;
   const requestData = await request.json();
-  console.log("requestData ", requestData)
+  console.log("requestData to update submission", requestData)
   await cachedSubmissionService.update(submissionId, requestData.graderFeedback, requestData.isCorrect);
 }
 

@@ -1,6 +1,4 @@
-TODO: The RUNNING.md briefly outlines steps needed to run the application.
-
-## Prequisities
+## Prerequisities
 
 - having docker and docker compose installed
 - build base grader image:
@@ -9,12 +7,19 @@ TODO: The RUNNING.md briefly outlines steps needed to run the application.
     Having the base grader image, i.e. `grader-image` is needed for
     programmatically building subsequent grading images.
 
-## Running the application
+## Running the actual application
+
+### Dev
 
 - run `docker compose up`
 - sometimes flyway won't start on the first run, leading to an error shown (...
   is not valid JSON)
 - in this case stop the containers with `ctrl + c` and re-run them
+
+### Prod
+
+- run `docker compose -f docker-compose.prod.yml up -d`
+- to stop, run `docker compose down`
 
 ## Tests
 

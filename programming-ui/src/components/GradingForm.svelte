@@ -3,7 +3,6 @@
   import { userUuid } from "../stores/stores.js";
   import { points } from "../stores/pointStore.js";
   import { getPoints } from "../utils/getPoints.js";
-  import { nextAssignmentId } from "../stores/assignmentStore.js";
 
   export let assignment;
   export let assignmentCount;
@@ -19,11 +18,12 @@
   };
 
   let state = States.IS_IDLE;
+  let nextAssignmentId = 1;
 
   onMount(async () => {
     $points = await getPoints($userUuid);
     const nextAssignment = await getNextAssignment(assignment.assignment_order);
-    $nextAssignmentId = nextAssignment.id;
+    nextAssignmentId = nextAssignment.id;
   });
 
   const getNextAssignment = async (order) => {
@@ -218,7 +218,7 @@
         <a
           id="nextAssignment"
           class="bg-green-600 hover:bg-green-700 text-white font-bold p-4 m-4 rounded"
-          href={`/assignments/${$nextAssignmentId}`}
+          href={`/assignments/${nextAssignmentId}`}
         >
           Next assignment
         </a>

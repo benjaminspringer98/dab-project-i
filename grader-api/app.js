@@ -16,8 +16,6 @@ async function processQueue() {
       const data = JSON.parse(serializedData[1]);
       console.log("found data in queue: ", data);
       console.log(`SERVER ${SERVER_ID} grading submission with id: ${data.submissionId}`);
-      let date = new Date();
-      console.log("date: ", date);
 
       const graderFeedback = await grade(data.code, data.testCode);
       const isCorrect = isCorrectResponse(graderFeedback);
