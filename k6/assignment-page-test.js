@@ -7,5 +7,5 @@ export const options = {
 };
 
 export default function () {
-    http.get("http://localhost:7800/assignments/1");
+    http.get("http://localhost:7800/");
 }

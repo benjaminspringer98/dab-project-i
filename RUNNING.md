@@ -12,8 +12,8 @@
 ### Dev
 
 - run `docker compose up`
-- sometimes flyway won't start on the first run, leading to an error shown (...
-  is not valid JSON)
+- sometimes flyway won't start on the first run, leading to undefined values
+  being shown in the frontend
 - in this case stop the containers with `ctrl + c` and re-run them
 
 ### Prod

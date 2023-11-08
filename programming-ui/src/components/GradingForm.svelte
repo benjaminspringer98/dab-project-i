@@ -3,9 +3,10 @@
   import { userUuid } from "../stores/stores.js";
   import { points } from "../stores/pointStore.js";
   import { getPoints } from "../utils/getPoints.js";
+  import AssignmentInfo from "./AssignmentInfo.svelte";
+  import { assignmentsCount } from "../stores/assignmentStore.js";
 
-  export let assignment;
-  export let assignmentCount;
+  export let id;
 
   let code = "";
   let warningText = "";
@@ -18,13 +19,19 @@
   };
 
   let state = States.IS_IDLE;
-  let nextAssignmentId = 1;
 
   onMount(async () => {
     $points = await getPoints($userUuid);
-    const nextAssignment = await getNextAssignment(assignment.assignment_order);
-    nextAssignmentId = nextAssignment.id;
   });
+
+  const getAssignment = async () => {
+    const response = await fetch(`/api/assignments/${id}`);
+    const assignment = await response.json();
+    const res = await getNextAssignment(assignment.assignment_order);
+    nextAssignmentId = res.id;
+
+    return assignment;
+  };
 
   const getNextAssignment = async (order) => {
     const response = await fetch("/api/assignments/next", {
@@ -37,20 +44,20 @@
     return await response.json();
   };
 
+  let assignment = getAssignment();
+  let nextAssignmentId;
+
   const isCompleted = async () => {
     const data = {
       user: $userUuid,
     };
-    const response = await fetch(
-      `/api/assignments/${assignment.id}/isCompleted`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      }
-    );
+    const response = await fetch(`/api/assignments/${id}/isCompleted`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
     return await response.json();
   };
 
@@ -65,19 +72,15 @@
       code: code,
     };
 
-    const response = await fetch(
-      `/api/assignments/${assignment.id}/submissions`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      }
-    );
+    const response = await fetch(`/api/assignments/${id}/submissions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
 
     const submission = await response.json();
-    console.log(submission);
 
     if (submission.userHasPending) {
       warningText = "You already have a pending submission";
@@ -100,14 +103,13 @@
         try {
           state = States.IS_GRADING;
           const response = await fetch(
-            `/api/assignments/${assignment.id}/submissions/${submissionId}/status`
+            `/api/assignments/${id}/submissions/${submissionId}/status`
           );
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
           const submission = await response.json();
 
-          // Stop polling if the submission is processed
           if (submission.status === "processed") {
             clearInterval(intervals.get(submissionId));
             intervals.delete(submissionId);
@@ -139,6 +141,7 @@
   })();
 
   const handleKeyDown = (event) => {
+    // prevent tab from moving focus out of textarea for code
     if (event.key === "Tab") {
       event.preventDefault();
 
@@ -157,6 +160,14 @@
     }
   };
 </script>
+
+{#await assignment}
+  <i class="fa-solid fa-spinner fa-spin fa-xl" />
+{:then assignment}
+  {#if assignment}
+    <AssignmentInfo {assignment} client:load />
+  {/if}
+{/await}
 
 {#await isCompletedPromise}
   <i class="fa-solid fa-spinner fa-spin fa-xl" />
@@ -214,7 +225,7 @@
         Correct!
       </p>
 
-      {#if assignment.assignment_order < assignmentCount}
+      {#if assignment.assignment_order < $assignmentCount}
         <a
           id="nextAssignment"
           class="bg-green-600 hover:bg-green-700 text-white font-bold p-4 m-4 rounded"
