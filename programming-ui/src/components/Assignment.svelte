@@ -146,7 +146,9 @@
 </script>
 
 {#if !$assignment}
-    <p>Looks like you have solved all assignments. Congratz!</p>
+    <p class="text-center text-lg m-10">
+        Looks like you have solved all assignments. Congratz!
+    </p>
 {:else}
     <AssignmentInfo assignment={$assignment} />
 
