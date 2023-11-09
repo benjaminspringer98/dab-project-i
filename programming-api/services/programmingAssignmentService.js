@@ -11,7 +11,7 @@ const findById = async (id) => {
 }
 
 const findNextUncompletedForUser = async (userUuid) => {
-  const rows = await sql`SELECT a.id
+  const rows = await sql`SELECT a.*
     FROM programming_assignments a
     LEFT JOIN (
       SELECT programming_assignment_id, BOOL_OR(correct) as has_correct_submission
@@ -24,7 +24,7 @@ const findNextUncompletedForUser = async (userUuid) => {
     LIMIT 1;`
 
   if (rows && rows.length > 0) {
-    return rows[0].id;
+    return rows[0];
   }
 
   // all assignments successfully completed

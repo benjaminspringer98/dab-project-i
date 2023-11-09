@@ -15,9 +15,9 @@
 
 2. Submitting assignment (only tests API)
 
-- http_reqs: 3120
-- http_req_duration - median: 24.5ms
-- http_req_duration - 99th percentile: 120.17ms
+- http_reqs: 3326
+- http_req_duration - median: 21.8ms
+- http_req_duration - 99th percentile: 147.39ms
 
 ## Prod performance
 
@@ -27,11 +27,11 @@
 - http_req_duration - median: 688µs
 - http_req_duration - 99th percentile: 2.79ms
 
-2. Submitting assignment
+2. Submitting assignment (only tests API)
 
-- http_reqs: 3990
-- http_req_duration - median: 19.67ms
-- http_req_duration - 99th percentile: 95.6ms
+- http_reqs: 5488
+- http_req_duration - median: 13.59ms
+- http_req_duration - 99th percentile: 67.82ms
 
 ## Thoughts
 

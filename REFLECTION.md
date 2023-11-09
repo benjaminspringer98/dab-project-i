@@ -31,7 +31,9 @@
 - grader-api continuously reads this queue, pops submissions out of it, and
   processes them
 - through this approach, deploying multiple instances is no problem, as they
-  won't access the same submission
+  won't access the same submission, and will each process the same number (you
+  can check this for example by checking the logs of the grader-api deployments,
+  where the count of processed submissions from the queue will be logged)
 
 ## Real time communication
 
@@ -52,7 +54,8 @@ Prod:
 - API: removed --watch flag from the Dockerfiles
 - data in the db is persisted (locally)
 - UI is built with astro build rather than astro dev, and served through Nginx
-- UI is cached (see next topic) and sent in a compressed format
+- requests to UI are cached (see next topic) and responses are sent in a
+  compressed format
 
 ## Caching
 
@@ -67,12 +70,14 @@ Prod:
   programming_assignments) could be passed
 - instead of short polling, which could spam the server with too many requests,
   if the interval is too small, websockets could be used
-- some endpoints send unnecessary data, when e.g. only the assignment id would
-  be needed. Reducing the amount of data passed would increase the performance
+- some endpoints send unnecessary data, passing e.g. the user id. Reducing the
+  amount of data passed would increase the performance. Here, e.g. a session
+  could be used to track the user (which would be implemented together with a
+  login system in a real use case)
 - Note: in the current implementation, the API is not secured. So in theory,
   anyone could update their own submission data. As the goal of this project is
   to focus on technologies relevant to scalability, this is intentional. In
   practice, additional mechanisms for securing the API should be in place, such
   as API keys. This adds more overhead though, which in turn will reduce
-  performance. Therefore, paying attention to the points mentioned before is
-  especially important in a practical scenario.
+  performance. Therefore, paying attention to the points on increasing
+  performance mentioned above is especially important in a practical scenario.

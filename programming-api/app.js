@@ -11,7 +11,7 @@ const cachedSubmissionService = cacheMethodCalls(submissionService, ["add", "upd
 const addSubmission = async (request, urlPatternResult) => {
   const requestData = await request.json();
 
-  if (await cachedSubmissionService.userHasPendingSubmission(requestData.user)) {
+  if (await submissionService.userHasPendingSubmission(requestData.user)) {
     return new Response(JSON.stringify({ userHasPending: true }));
   }
   const assignmentId = urlPatternResult.pathname.groups.id;
@@ -33,12 +33,12 @@ const addSubmission = async (request, urlPatternResult) => {
 const fetchNextUncompletedAssignment = async (request) => {
   const requestData = await request.json();
 
-  const currentAssignmentId = await cachedProgrammingAssignmentService.findNextUncompletedForUser(requestData.user);
-  if (!currentAssignmentId) {
+  const assignment = await cachedProgrammingAssignmentService.findNextUncompletedForUser(requestData.user);
+  if (!assignment) {
     return new Response(JSON.stringify(false));
   }
-  const currentAssignment = await cachedProgrammingAssignmentService.findById(currentAssignmentId);
-  return new Response(JSON.stringify(currentAssignment), {
+
+  return new Response(JSON.stringify(assignment), {
     headers: { "content-type": "application/json" },
   });
 }
@@ -60,7 +60,7 @@ const calculateUserPoints = async (request) => {
 
 const getSubmissionStatus = async (request, urlPatternResult) => {
   const submissionId = urlPatternResult.pathname.groups.sId;
-  const status = await cachedSubmissionService.getStatus(submissionId);
+  const status = await submissionService.getStatus(submissionId);
   if (status === "pending") {
     return new Response(JSON.stringify({ status }), {
       headers: { "content-type": "application/json" },

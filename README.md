@@ -1,26 +1,9 @@
-# Designing and Building Scalable Web Applications / Course Project I Template
+# Designing and Building Scalable Web Applications - Course Project I
 
-Provides an endpoint for grading programming assignments. Has the functionality
-needed to create a grader image based on `grader-image` and to copy source code
-and test code to the image.
+This project was completed as part of the module Designing and Building Scalable
+Web Applications, in the autumn term 2023, at Aalto University.
 
-When the grader API is run, the Docker daemon should be exposed to the grader
-API to allow running the created Docker images.
+General information on the application and corresponding design decisions can be
+found in REFLECTION.md
 
-This is done by mapping the docker daemon socket to the grader api in the
-`docker-compose.yml` file, e.g.
-
-```
-# ...
-  grader-api:
-    build: grader-api
-    image: grader-api
-    restart: "no"
-    volumes:
-      - ./grader-api/:/app
-      - ./app-cache/:/app-cache
-      - "/var/run/docker.sock:/var/run/docker.sock"
-    ports:
-      - 7000:7000
-# ...
-```
+Information on running the application can be found in RUNNING.md
