@@ -1,7 +1,5 @@
-import { serve } from "./deps.js";
 import { grade } from "./services/gradingService.js";
-
-import { connect } from "https://deno.land/x/redis/mod.ts";
+import { connect } from "./deps.js";
 
 const redis = await connect({ hostname: "redis-queue", port: 6379 });
 
@@ -14,7 +12,6 @@ async function processQueue() {
 
     if (serializedData) {
       const data = JSON.parse(serializedData[1]);
-      console.log("found data in queue: ", data);
       console.log(`SERVER ${SERVER_ID} grading submission with id: ${data.submissionId}`);
 
       const graderFeedback = await grade(data.code, data.testCode);

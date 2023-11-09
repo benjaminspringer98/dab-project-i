@@ -95,16 +95,6 @@ const calculateUserPoints = async (request) => {
   });
 }
 
-const hasUserCompleted = async (request, urlPatternResult) => {
-  const assignmentId = urlPatternResult.pathname.groups.id;
-  const requestData = await request.json();
-
-  const hasCompleted = await cachedProgrammingAssignmentService.hasUserCompleted(assignmentId, requestData.user);
-  return new Response(JSON.stringify(hasCompleted), {
-    headers: { "content-type": "application/json" },
-  });
-}
-
 const getSubmissionStatus = async (request, urlPatternResult) => {
   const submissionId = urlPatternResult.pathname.groups.sId;
   const status = await cachedSubmissionService.getStatus(submissionId);
@@ -135,11 +125,6 @@ const urlMapping = [
     method: "GET",
     pattern: new URLPattern({ pathname: "/assignments/:id" }),
     fn: getAssignment,
-  },
-  {
-    method: "POST",
-    pattern: new URLPattern({ pathname: "/assignments/:id/isCompleted" }),
-    fn: hasUserCompleted,
   },
   {
     method: "POST",

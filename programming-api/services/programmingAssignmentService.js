@@ -24,13 +24,11 @@ const findNextByOrder = async (order) => {
   return false;
 }
 
-// could be cached
 const getCount = async () => {
   const rows = await sql`SELECT COUNT(*) FROM programming_assignments;`
   return rows[0].count;
 }
 
-// could maybe be cached? have to be really careful though
 const findNextUncompletedForUser = async (userUuid) => {
   const rows = await sql`SELECT a.id
     FROM programming_assignments a
@@ -52,17 +50,6 @@ const findNextUncompletedForUser = async (userUuid) => {
   return false;
 }
 
-const hasUserCompleted = async (id, userUuid) => {
-  const rows = await sql`SELECT * FROM programming_assignment_submissions 
-    WHERE programming_assignment_id = ${id} AND user_uuid = ${userUuid} AND correct;`;
-
-  if (rows && rows.length > 0) {
-    return true;
-  }
-
-  return false;
-}
-
 const findByOrder = async (order) => {
   const rows = await sql`SELECT * FROM programming_assignments WHERE assignment_order = ${order};`;
 
@@ -73,4 +60,4 @@ const findByOrder = async (order) => {
   return false;
 }
 
-export { findAll, findById, getCount, findNextUncompletedForUser, findByOrder, findNextByOrder, hasUserCompleted };
+export { findAll, findById, getCount, findNextUncompletedForUser, findByOrder, findNextByOrder };

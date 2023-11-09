@@ -13,21 +13,14 @@ the performance of the application.
 
 ## Basic functionality
 
-- Application shows some basic info at `/` and user can press a button there to
-  open the next assignment, that they haven't yet completed (opens
-  `/assignments/[id]`)
 - Users are tracked through an id saved in localstorage and this is accessed
   through a Svelte store
-- Users can open any assignment through a menu, accessing `/assignments/[id]`
-- this decision was made to increase transparency, if in a real-life scenario,
-  users want to have a peek at later assignments, to look how hard e.g. the
-  course for which the assignments will become later
-- when accessing an already successfully answered assignment, a notification is
-  shown on the page
 - user points only get increased on first successful completion of each
   assignment
 - when successfully answering an assignment, users are shown a success message,
   and a button is shown to move to the next one
+- users receive + 100 points for the **first** successful submission of an
+  assignment
 - users can only have one submission in grading at a time (you can test this
   e.g. by running the assignment submission tests with k6, then navigating to
   the app and trying to submit an assignment multiple times)
@@ -56,6 +49,14 @@ the performance of the application.
 - when the user reloads or closes the page, while the assignment is still being
   graded, the real time connection is lost
 
+## Dev vs. Prod config
+
+## Caching
+
+- dev caches database queries, purges when new data is added/updated (add/update
+  submission)
+- prod uses this + NGINX caching for the frontend
+
 ## SSG
 
 - All assignments are fetched at build time, and the assignment pages are
@@ -69,7 +70,7 @@ the performance of the application.
 - Alluding to lecture 3: Instead of passing the complete test code into the
   message broker (Redis), a reference to the test code (field of db table
   programming_assignments) could be passed
-- instead of short polling, websockets could be used
+- instead of short polling, which could spam the server with too many requests,
+  if the interval is too small, websockets could be used
 - some endpoints send unnecessary data, when e.g. only the assignment id would
-  be needed. Reducing the amount of data passed would also increase the
-  performance
+  be needed. Reducing the amount of data passed would increase the performance

@@ -106,7 +106,7 @@ services:
     image: redis:latest
     command: redis-server /usr/local/etc/redis/redis.conf
     volumes:
-      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf   
+      - ./redis-cache/redis.conf:/usr/local/etc/redis/redis.conf   
     expose:
       - 6379
       
@@ -114,6 +114,6 @@ services:
     image: redis:latest
     command: redis-server /usr/local/etc/redis/redis.conf
     volumes:
-      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis-queue/redis.conf:/usr/local/etc/redis/redis.conf
     expose:
       - 6379

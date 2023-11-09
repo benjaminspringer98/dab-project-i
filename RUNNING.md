@@ -13,8 +13,10 @@
 
 - run `docker compose up`
 - sometimes flyway won't start on the first run, leading to undefined values
-  being shown in the frontend
+  being shown in the frontend, as the database tables to not exist
 - in this case stop the containers with `ctrl + c` and re-run them
+- sometimes this can happen multiple times (at least on my pc), I have no idea
+  why though
 
 ### Prod
 
@@ -29,8 +31,6 @@
 - then run E2E tests with Playwright in another terminal:
   `docker-compose run --entrypoint=npx e2e-playwright playwright test && docker-compose rm -sf`
 - notes:
-  - I'm on Mac M2, so I changed to base image. If it does not work for you,
-    consider changing it back to the one from the project template
   - I had to add the line `RUN npx playwright install` to the Playwright
     Dockerfile, because it just stopped working randomly at some point
   - if you are interested, the error was
@@ -42,3 +42,9 @@
 
 1. run `docker compose up` in one terminal
 2. another terminal: cd into k6 folder and run `k6 run <test-file>`
+
+### General notes
+
+- I'm on Mac M2, so I had to change some base images
+- if you run into any errors with these, please change the base images back
+  (e.g. to the ones from the project template)
