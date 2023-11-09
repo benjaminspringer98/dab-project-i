@@ -51,9 +51,6 @@ const getStatus = async (id) => {
     return false;
 }
 
-const findAllByUserUuid = async (userUuid) => {
-    return await sql`SELECT * FROM programming_assignment_submissions WHERE user_uuid = ${userUuid};`;
-}
 
 const findMatchingSubmission = async (assignmentId, code) => {
     const rows = await sql`SELECT * FROM programming_assignment_submissions 
@@ -79,4 +76,4 @@ const getPoints = async (userUuid) => {
     return rows[0].points;
 }
 
-export { add, findById, getStatus, userHasPendingSubmission, findAllByUserUuid, findMatchingSubmission, update, getPoints }
+export { add, findById, getStatus, userHasPendingSubmission, findMatchingSubmission, update, getPoints }

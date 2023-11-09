@@ -1,8 +1,3 @@
-TODO: There is a brief description of the application in REFLECTION.md that
-highlights the key design decisions for the application. The document also
-contains a reflection of possible improvements that should be done to improve
-the performance of the application.
-
 # Key design decisions
 
 ## Overview
@@ -51,19 +46,18 @@ the performance of the application.
 
 ## Dev vs. Prod config
 
+Prod:
+
+- containers restart on failure
+- data in the db is persisted (locally)
+- UI is built with astro build rather than astro dev, and served through Nginx
+- UI is cached (see next topic) and sent in a compressed format
+
 ## Caching
 
 - dev caches database queries, purges when new data is added/updated (add/update
   submission)
 - prod uses this + NGINX caching for the frontend
-
-## SSG
-
-- All assignments are fetched at build time, and the assignment pages are
-  prerendered with information about the assignments
-- This is fine in our case, as there exists no functionality to add new
-  assignments during runtime (apart from directly creating new ones in the
-  database).
 
 ## Future outlook: Improving performance
 

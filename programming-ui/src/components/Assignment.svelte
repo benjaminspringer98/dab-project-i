@@ -3,8 +3,8 @@
     import { userUuid } from "../stores/stores.js";
     import { points } from "../stores/pointStore.js";
     import { getPoints } from "../utils/getPoints.js";
+    import { assignment } from "../stores/assignmentStore.js";
     import AssignmentInfo from "./AssignmentInfo.svelte";
-    import { assignmentsCount, assignment } from "../stores/assignmentStore.js";
 
     let code = "";
     let warningText = "";

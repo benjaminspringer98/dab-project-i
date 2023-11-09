@@ -29,11 +29,12 @@
 
 2. Submitting assignment
 
-- http_reqs: 6612
-- http_req_duration - median: 10.99ms
-- http_req_duration - 99th percentile: 63.24ms
+- http_reqs: 3990
+- http_req_duration - median: 19.67ms
+- http_req_duration - 99th percentile: 95.6ms
 
 ## Thoughts
 
+- page load on prod being faster than dev is expected, as astro build generates static files
 - it's interesting to see, that the prod config makes such a big difference for
   loading the assignment page

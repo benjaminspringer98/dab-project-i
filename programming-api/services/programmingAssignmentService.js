@@ -1,9 +1,5 @@
 import { sql } from "../database/database.js";
 
-const findAll = async () => {
-  return await sql`SELECT * FROM programming_assignments;`;
-};
-
 const findById = async (id) => {
   const rows = await sql`SELECT * FROM programming_assignments WHERE id = ${id};`;
 
@@ -12,21 +8,6 @@ const findById = async (id) => {
   }
 
   return false;
-}
-
-const findNextByOrder = async (order) => {
-  const rows = await sql`SELECT * FROM programming_assignments WHERE assignment_order = ${Number(order) + 1};`;
-
-  if (rows && rows.length > 0) {
-    return rows[0];
-  }
-
-  return false;
-}
-
-const getCount = async () => {
-  const rows = await sql`SELECT COUNT(*) FROM programming_assignments;`
-  return rows[0].count;
 }
 
 const findNextUncompletedForUser = async (userUuid) => {
@@ -50,14 +31,4 @@ const findNextUncompletedForUser = async (userUuid) => {
   return false;
 }
 
-const findByOrder = async (order) => {
-  const rows = await sql`SELECT * FROM programming_assignments WHERE assignment_order = ${order};`;
-
-  if (rows && rows.length > 0) {
-    return rows[0];
-  }
-
-  return false;
-}
-
-export { findAll, findById, getCount, findNextUncompletedForUser, findByOrder, findNextByOrder };
+export { findById, findNextUncompletedForUser };
