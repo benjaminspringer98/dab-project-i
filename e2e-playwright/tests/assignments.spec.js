@@ -2,7 +2,9 @@ const { test, expect } = require("@playwright/test");
 
 test("Providing the wrong answer shows text 'Incorrect'", async ({ page }) => {
   await page.goto("/");
+  await page.waitForTimeout(1000);
   const code = randomString(50);
+
   await page.locator("#code").type(code);
   await page.locator("#submitBtn").click();
 

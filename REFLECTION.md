@@ -49,6 +49,7 @@
 Prod:
 
 - containers restart on failure
+- API: removed --watch flag from the Dockerfiles
 - data in the db is persisted (locally)
 - UI is built with astro build rather than astro dev, and served through Nginx
 - UI is cached (see next topic) and sent in a compressed format
@@ -68,3 +69,10 @@ Prod:
   if the interval is too small, websockets could be used
 - some endpoints send unnecessary data, when e.g. only the assignment id would
   be needed. Reducing the amount of data passed would increase the performance
+- Note: in the current implementation, the API is not secured. So in theory,
+  anyone could update their own submission data. As the goal of this project is
+  to focus on technologies relevant to scalability, this is intentional. In
+  practice, additional mechanisms for securing the API should be in place, such
+  as API keys. This adds more overhead though, which in turn will reduce
+  performance. Therefore, paying attention to the points mentioned before is
+  especially important in a practical scenario.

@@ -13,10 +13,6 @@ dist/
 .cache/
 .app-cache/
 
-# Ignore Docker files
-docker-compose.yml
-Dockerfile
-
 # Ignore IDE files
 .vscode/
 .idea/

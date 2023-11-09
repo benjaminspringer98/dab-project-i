@@ -35,6 +35,8 @@
 
 ## Thoughts
 
-- page load on prod being faster than dev is expected, as astro build generates static files
-- it's interesting to see, that the prod config makes such a big difference for
-  loading the assignment page
+- page load on prod being faster than dev is expected, as astro build generates
+  static files, that are then cached and served by Nginx
+- it's interesting to see, that the prod config also improves the performance,
+  when calling the API to submit an assignment, even though the dev and prod
+  config is almost the same here

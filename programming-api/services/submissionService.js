@@ -15,14 +15,12 @@ const add = async (assignmentId, code, userUuid) => {
     let created;
     if (matchingSubmission) {
         // if matching submission found, add new submission with values of matching submission
-        console.log("matchingSubmission:", matchingSubmission);
         created = await sql`INSERT INTO programming_assignment_submissions (programming_assignment_id, code, user_uuid, grader_feedback, status, correct) 
                     VALUES (${assignmentId}, ${code}, ${userUuid}, ${matchingSubmission.grader_feedback}, ${matchingSubmission.status}, ${matchingSubmission.correct})
                     RETURNING id;`;
 
     } else {
         // if no matching submission found, add new submission with status pending by default
-        console.log("no matching submission found");
         created = await sql`INSERT INTO programming_assignment_submissions (programming_assignment_id, code, user_uuid) 
                     VALUES (${assignmentId}, ${code}, ${userUuid})
                     RETURNING id;`;
