@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 test("Providing the wrong answer shows text 'Incorrect'", async ({ page }) => {
-  await page.goto("/assignments/1");
+  await page.goto("/");
   const code = randomString(50);
   await page.locator("#code").type(code);
   await page.locator("#submitBtn").click();
@@ -10,9 +10,11 @@ test("Providing the wrong answer shows text 'Incorrect'", async ({ page }) => {
 });
 
 test("Providing the correct answer shows text 'Correct!'", async ({ page }) => {
-  await page.goto("/assignments/1");
-  const code = `def hello():
-  return "Hello"`;
+  await page.goto("/");
+  await page.waitForTimeout(1000);
+  const title = await page.locator("#title").textContent();
+  const code = getCorrectCode(title);
+
   await page.locator("#code").fill(code);
   await page.locator("#submitBtn").click();
 
@@ -20,21 +22,25 @@ test("Providing the correct answer shows text 'Correct!'", async ({ page }) => {
 });
 
 test("Providing the correct answer allows user to move to next assignment", async ({ page }) => {
-  await page.goto("/assignments/1");
+  await page.goto("/");
+  await page.waitForTimeout(1000);
   const title = await page.locator("#title").textContent();
-  const code = `def hello():
-  return "Hello"`;
+  const code = getCorrectCode(title);
+
   await page.locator("#code").fill(code);
   await page.locator("#submitBtn").click();
   await page.locator("#nextAssignment").click();
+
   await expect(page.locator("#title")).not.toHaveText(title);
 });
 
 test("Providing the correct answer increases user points", async ({ page }) => {
-  await page.goto("/assignments/1");
+  await page.goto("/");
+  await page.waitForTimeout(1000);
   const points = await page.locator("#points").textContent();
-  const code = `def hello():
-  return "Hello"`;
+  const title = await page.locator("#title").textContent();
+  const code = getCorrectCode(title);
+
   await page.locator("#code").type(code);
   await page.locator("#submitBtn").click();
 
@@ -42,7 +48,8 @@ test("Providing the correct answer increases user points", async ({ page }) => {
 });
 
 test("Providing wrong answer does not increase user points", async ({ page }) => {
-  await page.goto("/assignments/1");
+  await page.goto("/");
+  await page.waitForTimeout(1000);
   const points = await page.locator("#points").textContent();
   const code = randomString(50);
   await page.locator("#code").type(code);
@@ -63,3 +70,24 @@ const randomString = (length) => {
   }
   return result;
 };
+
+const getCorrectCode = (title) => {
+  let code = "";
+  switch (title) {
+    case "Hello":
+      code = `def hello():
+  return "Hello"`;
+      break;
+    case "Hello world":
+      code = `def hello():
+  return "Hello world"`;
+      break;
+    case "Sum":
+      code = `def sum(a, b):
+  return a + b`;
+    default:
+      break;
+  }
+
+  return code;
+}

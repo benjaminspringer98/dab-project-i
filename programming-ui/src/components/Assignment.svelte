@@ -196,6 +196,7 @@
                 </p>
                 <button
                     on:click={fetchAssignmentData}
+                    id="nextAssignment"
                     class="bg-green-600 hover:bg-green-700 text-white font-bold p-4 m-4 rounded"
                     >Next assignment</button
                 >

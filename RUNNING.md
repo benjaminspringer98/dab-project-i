@@ -29,10 +29,6 @@
 - then run E2E tests with Playwright in another terminal:
   `docker-compose run --entrypoint=npx e2e-playwright playwright test && docker-compose rm -sf`
 - notes:
-  - Playwright seems to be very unreliable: I have run countless tests with it
-    in this and other projects, sometimes all tests will pass, sometimes tests
-    will just randomly fail, even though everything is working as expected in
-    the application
   - I'm on Mac M2, so I changed to base image. If it does not work for you,
     consider changing it back to the one from the project template
   - I had to add the line `RUN npx playwright install` to the Playwright
