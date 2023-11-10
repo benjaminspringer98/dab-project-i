@@ -28,3 +28,5 @@ Thumbs.db
 production-database-data/
 
 grader-api/*.data
+
+app-cache/
